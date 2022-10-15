@@ -6,22 +6,23 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 
-use Database\Seeders\VisitorSeeder;
+use App\Models\Visitor;
 
 
-class DatabaseSeeder extends Seeder
+class VisitorSeeder extends Seeder
 
 {
 
 public function run()
 
+
 {
 
-$this->call([
+Visitor::factory()
 
-VisitorSeeder::class
+->count(50)
 
-]);
+->create();
 
 }
 
