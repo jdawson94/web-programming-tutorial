@@ -22,13 +22,15 @@
 
 <article>
 
-<h3><a href="{{ route('visitors.show', $visitor->id) }}">{{ $visitor->name }}</a></h3>
+<h3><a href="{{ route('visitors.show', $visitor->id) }}">{{ $visitor->user->name }}</a></h3>
 
 
 
 <p>{{ $visitor->comments }}</p>
 
 
+
+@if (Auth::user() && Auth::user()->id === $visitor->user_id)
 
 <form action="{{ route('visitors.destroy', $visitor->id) }}" method="POST">
 
@@ -47,6 +49,8 @@
 <button type="submit" class="btn btn-red">Delete</button>
 
 </form>
+
+@endif
 
 </article>
 

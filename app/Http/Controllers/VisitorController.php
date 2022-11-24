@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Visitor;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class VisitorController extends Controller
 {
@@ -13,20 +14,19 @@ class VisitorController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function index() {
+        if (Auth::check()){
 
-        $visitors = Visitor::orderBy('created_at', 'desc')
-        
-        ->paginate(20);
-        
-        
-        
-        return view('visitors/index', [
-        
-        'visitors' => $visitors
-        
-        ]);
-        
+            $visitors = Visitor::orderBy('created_at', 'desc')
+            ->paginate(20);
+            return view('visitors/index', [
+            'visitors' => $visitors
+            ]);
         }
+
+        else {
+            return view('auth/login');
+        }
+    }
 
     /**
      * Show the form for creating a new resource.
@@ -35,12 +35,15 @@ class VisitorController extends Controller
      */
     public function create() {
 
-        return view('visitors/create');
-        
+        if (Auth::check()){
+            return view('visitors/create');
         }
-        
-        
 
+        else{
+            return view('auth/login');
+        }    
+    }
+        
     /**
      * Store a newly created resource in storage.
      *
@@ -49,25 +52,24 @@ class VisitorController extends Controller
      */
     public function store(Request $request){
 
-        $request->validate([
-        
-        'name' => 'required',
-        
-        'comments' => 'required'
-        
-        ]);
-        
-        
-        
-        Visitor::create($request->all());
-        
-        
-        
-        return redirect()->route('visitors.index')
-        
-        ->with('success', 'Signing created successfully.');
-        
+        if (Auth::check()){
+
+            $request->validate([
+                'comments' => 'required'
+            ]);
+            
+            $visitor = new Visitor;
+            $visitor->user()->associate(Auth::user());
+            $visitor->comments = $request->comments;
+            $visitor->save();        
+            return redirect()->route('visitors.index')
+            ->with('success','Signing created successfully.');
         }
+
+        else{
+            abort(401);
+        }
+    }
         
         
 
@@ -79,13 +81,26 @@ class VisitorController extends Controller
      */
     public function show(Visitor $visitor) {
 
-        return view('visitors.show', [
-        
-        'visitor' => $visitor
-        
-        ]);
-        
+        if (Auth::check()){
+            
+            $user = Auth::user();
+
+            if($user->id == $visitor->user_id){
+                return view('visitors.show', [
+                    'visitor' => $visitor
+                ]);
+            }
+            
+            else{
+                abort(403);
+            }
         }
+        
+        else {
+            return view('auth/login');
+        }
+
+    }
 
     /**
      * Show the form for editing the specified resource.
@@ -94,14 +109,26 @@ class VisitorController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function edit(Visitor $visitor) {
+        if (Auth::check()){
 
-        return view('visitors.edit', [
-        
-        'visitor' => $visitor
-        
-        ]);
-        
+            $user = Auth::user();
+
+            if($user->id == $visitor->user_id){
+                return view('visitors.edit', [
+                    'visitor' => $visitor
+                ]);
+            }
+
+            else{
+                abort(403);
+            }
+
         }
+        
+        else{
+            return view('auth/login');
+        }
+    }
 
     /**
      * Update the specified resource in storage.
@@ -110,27 +137,34 @@ class VisitorController extends Controller
      * @param  \App\Models\Visitor  $visitor
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Visitor $visitor) {
+    public function update(Request $request, Visitor $visitor)
+    {
+        if (Auth::check()){
+            
+            $user = Auth::user();
 
-        $request->validate([
-        
-        'name' => 'required',
-        
-        'comments' => 'required'
-        
-        ]);
-        
-        
-        
-        $visitor->update($request->all());
-        
-        
-        
-        return redirect()->route('visitors.index')
-        
-        ->with('success', 'Signing updated successfully');
-        
+            if($user->id == $visitor->user_id){
+
+                $request->validate([
+                    'comments' => 'required'
+                ]);
+                
+                $visitor->comments = $request->comments;
+                $visitor->save();
+                
+                return redirect()->route('visitors.index')
+                ->with('success', 'Signing updated successfully');
+            }
+            
+            else{
+                abort(403);
+            }
         }
+
+        else {
+            abort(401);
+        }
+    }
 
     /**
      * Remove the specified resource from storage.
@@ -140,13 +174,27 @@ class VisitorController extends Controller
      */
     public function destroy(Visitor $visitor) {
 
-        $visitor->delete();
-        
-        
-        
-        return redirect()->route('visitors.index')
-        
-        ->with('success', 'Signing deleted successfully');
-        
+        if (Auth::check()){
+
+            $user = Auth::user();
+
+            if($user->id == $visitor->user_id){
+
+                $visitor->delete();
+                
+                return redirect()->route('visitors.index')    
+                ->with('success', 'Signing deleted successfully');
+            }
+
+            else{
+                abort(403);
+            }   
+
         }
+
+        else {
+            abort(401);
+        }
+ 
+    }
 }
