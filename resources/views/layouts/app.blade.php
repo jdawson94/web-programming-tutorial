@@ -49,6 +49,7 @@
 <li><a href="/visitors">Visitors</a></li>
 
 <li><a href="/visitors/create">Sign the guestbook</a></li>
+<li><a href="/logout">Logout</a></li>
 
 @endif
 

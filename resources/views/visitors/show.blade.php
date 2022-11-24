@@ -2,7 +2,7 @@
 
 
 
-@section('title', 'Showing ' . $visitor->name)
+@section('title', 'Showing ' . $visitor->user->name)
 
 
 
